@@ -8,8 +8,7 @@ class ModelSet < ApplicationRecord
   has_many :todo_items, dependent: :destroy
   has_many :painting_batch_model_sets, dependent: :destroy
   has_many :painting_batches, through: :painting_batch_model_sets
-
-  has_many_attached :images
+  has_many :photos, dependent: :destroy
 
   enum :status, {
     on_sprue: 0,
@@ -25,6 +24,14 @@ class ModelSet < ApplicationRecord
     medium: 1,
     high: 2
   }, prefix: true
+
+  # Archived reasons
+  ARCHIVED_REASONS = %w[for_sale sold given_away other].freeze
+
+  # Scopes
+  scope :active, -> { where(archived: false) }
+  scope :archived, -> { where(archived: true) }
+  scope :for_sale, -> { where(archived: true, archived_reason: 'for_sale') }
   
   validates :name, presence: true
   validates :total_models, presence: true, numericality: { greater_than: 0 }
@@ -33,6 +40,37 @@ class ModelSet < ApplicationRecord
   
   validate :model_counts_sum
 
+  # Photo convenience methods
+  def wip_photos
+    photos.photo_type_wip.ordered
+  end
+
+  def finished_photos
+    photos.photo_type_finished.ordered
+  end
+
+  def reference_photos
+    photos.photo_type_reference.ordered
+  end
+
+  def primary_photo(type = :finished)
+    photos.send("photo_type_#{type}").primary_photos.first ||
+    photos.send("photo_type_#{type}").ordered.first
+  end
+
+  # Archive methods
+  def archive!(reason)
+    update(archived: true, archived_reason: reason, archived_at: Time.current)
+  end
+
+  def unarchive!
+    update(archived: false, archived_reason: nil, archived_at: nil)
+  end
+
+  def for_sale?
+    archived && archived_reason == 'for_sale'
+  end
+
   private
 
   def model_counts_sum
@@ -40,7 +78,7 @@ class ModelSet < ApplicationRecord
 
     sum = on_sprue + in_assembly + assembled + in_painting + painted 
     if sum > total_models
-      errors.add(:base, "The sum of model counts (#{sum}) cannot exceed total models (#{total_models}).")
+      errors.add(:base, "Sum of model counts cannot exceed total models")
     end
   end
 end

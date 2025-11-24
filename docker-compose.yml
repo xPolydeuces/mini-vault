@@ -1,40 +1,35 @@
+version: '3.8'
+
 services:
-  backend:
-    stdin_open: true
-    tty: true
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    command: bin/dev
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: minivault
+      POSTGRES_PASSWORD: minivault
+      POSTGRES_DB: minivault_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+      - node_modules:/app/node_modules
     ports:
       - "3000:3000"
     depends_on:
-      postgresql:
-        condition: service_started
-    volumes:
-      - .:/rails
-      - bundle_cache:/usr/local/bundle
-  postgresql:
-    image: postgres:17
-    volumes:
-      - db_data:/var/lib/postgresql/data
+      - db
     environment:
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: pg_isready -U postgres -h postgresql
-      interval: 5s
-  dragonfly:
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    ulimits:
-      memlock: -1
-    volumes:
-      - dragonflydata:/data
-  mailcatcher:
-    image: sj26/mailcatcher
-    ports:
-      - "1080:1080"
-      - "1025:1025"
+      DATABASE_URL: postgres://minivault:minivault@db:5432/minivault_development
+      RAILS_ENV: development
+    stdin_open: true
+    tty: true
+
 volumes:
-  db_data:
+  postgres_data:
   bundle_cache:
-  dragonflydata:
+  node_modules:

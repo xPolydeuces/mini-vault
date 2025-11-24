@@ -1,7 +1,7 @@
 class CreatePaintingBatches < ActiveRecord::Migration[8.1]
   def change
     create_table :painting_batches do |t|
-      t.string :batch_number, null: false
+      t.string :name, null: false
       t.text :notes
       t.date :started_at
       t.date :completed_at

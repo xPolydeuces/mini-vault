@@ -1,5 +1,5 @@
 class Faction < ApplicationRecord
-  belong_to :series, counter_cache: true
+  belongs_to :series, counter_cache: true
   has_many :model_sets, dependent: :destroy
 
   validates :name, presence: true

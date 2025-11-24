@@ -10,9 +10,7 @@ puts "Creating series..."
 
 wh40k = Series.create!(name: "Warhammer 40,000")
 aos = Series.create!(name: "Age of Sigmar")
-tow = Series.create!(name: "The Old World")
 malifaux = Series.create!(name: "Malifaux")
-other = Series.create!(name: "Other")
 
 puts "Creating factions..."
 
@@ -68,6 +66,10 @@ boyz = ModelSet.create!(
   paint_scheme_notes: "Green skin, brown leather, metal drybrush",
   purchase_date: 1.year.ago
 )
+
+# Mark one model for sale
+puts "Marking a model for sale..."
+boyz.archive!('for_sale')
 
 # Skaven with split example
 clanrats = ModelSet.create!(
