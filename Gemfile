@@ -26,6 +26,9 @@ gem "solid_cache"
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# Image processing for ActiveStorage variants
+gem "image_processing", "~> 1.2"
+
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", require: false
 
@@ -35,9 +38,9 @@ gem "thruster", require: false
 # Background job processing
 gem "sidekiq"
 
-# Authentication framework
-gem "devise"
-gem "devise-i18n"
+# Authentication framework - for future reference
+# gem "devise"
+# gem "devise-i18n"
 
 # A framework for creating reusable, testable & encapsulated view components
 gem "view_component"
@@ -117,8 +120,8 @@ group :development, :test do
   # Debugger for Ruby
   gem "byebug"
 
-  # Authorization framework
-  gem "action_policy"
+  # Authorization framework - for future reference
+  # gem "action_policy"
 end
 
 group :development do
