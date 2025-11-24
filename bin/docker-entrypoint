@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+# Remove a potentially pre-existing server.pid for Rails.
+rm -f /rails/tmp/pids/server.pid
+
+# Wait for PostgreSQL
+echo "Waiting for PostgreSQL..."
+until pg_isready -h postgresql -U postgres; do
+  echo "PostgreSQL is unavailable - sleeping"
+  sleep 1
+done
+echo "PostgreSQL is up!"
+
+# Check if database exists and create/migrate if needed
+echo "Checking database..."
+if bin/rails db:version 2>/dev/null; then
+  echo "Database exists, checking for pending migrations..."
+  bin/rails db:migrate
+else
+  echo "Database not found, creating..."
+  bin/rails db:create
+  bin/rails db:migrate
+  bin/rails db:seed
+fi
+
+echo "Database ready!"
+
+# Then exec the container's main process (what's set as CMD in the Dockerfile)
+exec "$@"
